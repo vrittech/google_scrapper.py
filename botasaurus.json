@@ -1,3 +1,9 @@
 {
-    "driver_path": "/usr/bin/chromedriver"
+    "driver_path": "/usr/bin/chromedriver",
+    "chrome_options": [
+        "--headless",
+        "--disable-gpu",
+        "--no-sandbox",
+        "--disable-dev-shm-usage"
+    ]
 }
