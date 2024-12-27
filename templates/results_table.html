@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scraped Results</title>
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            white-space: nowrap;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        #info {
+            margin: 20px 0;
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h2>Scraped Results</h2>
+    <div id="info">
+        <p>Total Results: <span id="resultCount">0</span></p>
+        <p>Time Taken: <span id="timeTaken">0</span> seconds</p>
+    </div>
+    <table id="scrapedTable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Details</th>
+                <th>Phone Number</th>
+                <th>Website</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <!-- Required JS Libraries -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            const table = $('#scrapedTable').DataTable({
+                responsive: true,
+                autoWidth: false,
+                paging: true,
+                searching: true,
+                ordering: true,
+                lengthMenu: [5, 10, 25, 50],
+                pageLength: 10
+            });
+
+            // Function to fetch scraped results and populate the table
+            async function fetchScrapedResults() {
+                try {
+                    const response = await fetch('/api/scrape/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            keywords: ["restaurant"],
+                            locations: ["New York"],
+                            max_results: 10,
+                            scrape_reviews: false,
+                            convert_to_english: true
+                        })
+                    });
+
+                    if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+                    const data = await response.json();
+
+                    // Update result count and time taken (if provided)
+                    $('#resultCount').text(data.result_count || 0);
+                    $('#timeTaken').text(data.time_taken || "N/A");
+
+                    // Clear and repopulate table
+                    table.clear();
+                    data.results.forEach(result => {
+                        table.row.add([
+                            result.name || "N/A",
+                            result.details || "N/A",
+                            result.phone_number || "N/A",
+                            result.website && result.website !== "N/A"
+                                ? `<a href="${result.website}" target="_blank">${result.website}</a>`
+                                : "N/A"
+                        ]);
+                    });
+                    table.draw();
+                } catch (error) {
+                    console.error('Error fetching scraped results:', error);
+                    alert('Failed to fetch scraped results. Check console for details.');
+                }
+            }
+
+            // Fetch results on page load or trigger (replace with form submission if needed)
+            fetchScrapedResults();
+        });
+    </script>
+</body>
+</html>

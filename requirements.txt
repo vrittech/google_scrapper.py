@@ -1,3 +1,87 @@
+asgiref
+attrs
+autobahn
+Automat
+certifi
+cffi
+channels
+charset-normalizer
+constantly
+cryptography
+daphne
+django==5.0
+django-cors-headers==4.6.0
+django-filter==24.3
+djangorestframework==3.14.0
+djangorestframework-simplejwt==5.3.1
+drf-extra-fields
+drf-yasg
+drfapigenerator
+filetype
+hyperlink
+idna
+incremental
+inflection
+packaging
+pillow
+psycopg2-binary
+pyasn1
+pyasn1_modules
+pycparser
+PyJWT
+pyOpenSSL
+python-decouple
+python-dotenv
+pytz
+PyYAML
+requests
+service-identity
+setuptools==75.6.0
+six
+sqlparse
+Twisted
+txaio
+typing_extensions
+uritemplate
+urllib3
+zope.interface
+django-phonenumbers
+django-colorfield
+# django-crontab
+google-auth
+python-dateutil
+# django-celery-beat
+# celery
+# redis
+selenium
+requests
+beautifulsoup4
+webdriver-manager
+et-xmlfile
+greenlet
+numpy
+openpyxl
+pandas
+playwright
+pyee
+python-dateutil
+pytz
+six
+typing_extensions
+celery
+redis
+django-celery-beat
+Unidecode
+geonamescache
+# dateutils
+casefy
+# lxml
+# regex
+# botasaurus==3.1.6
+
+
+
+
 botasaurus>=4.0.58
 botasaurus-server>=4.0.56
 dateutils

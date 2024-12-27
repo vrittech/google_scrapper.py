@@ -5,8 +5,18 @@ from botasaurus.request import request
 from botasaurus.task import task
 from botasaurus.cache import DontCache
 from src.sort_filter import filter_places, sort_dict_by_keys
+from src.write_output import write_output
+from src.sort_filter import filter_places, sort_places
 
+from typing import List, Optional, Dict
+
+from .cities import Cities
+from .lang import Lang
+from .category import Category
+
+from .fields import ALL_FIELDS, ALL_SOCIAL_FIELDS, DEFAULT_SOCIAL_FIELDS, Fields, DEFAULT_FIELDS, DEFAULT_FIELDS_WITHOUT_SOCIAL_DATA, ALL_FIELDS_WITHOUT_SOCIAL_DATA
 from .social_scraper import FAILED_DUE_TO_CREDITS_EXHAUSTED, FAILED_DUE_TO_NOT_SUBSCRIBED, FAILED_DUE_TO_UNKNOWN_ERROR, get_website_contacts, scrape_social
+
 
 def create_place_data(query, max, lang, geo_coordinates, zoom, links):
     place_data = {
@@ -325,10 +335,11 @@ def google_maps_scraper(_, data):
     geo_coordinates = data['coordinates']
     zoom = data['zoom_level']
     query = data['query']
-    links = data.get('links')
+    links = data.get('links',[])
 
     place_data = create_place_data(query,  max_results, lang, geo_coordinates, zoom, links)
-    places_obj = scraper.scrape_places(place_data,)
+    places_obj = scraper.scrape_places(place_data)
+    print("************",places_obj)
     if places_obj is None:
         return DontCache([])
     should_scrape_socials = key  
@@ -381,3 +392,206 @@ def website_contacts_scraper(data):
     if has_seen_error:
         return DontCache(output)
     return output
+
+def determine_fields(fields, should_scrape_socials, scrape_reviews):
+      if fields == Gmaps.ALL_FIELDS:
+          if should_scrape_socials:
+            fields = ALL_FIELDS 
+          else: 
+            fields = ALL_FIELDS_WITHOUT_SOCIAL_DATA 
+      elif fields == Gmaps.DEFAULT_FIELDS:              
+          if should_scrape_socials:
+            fields = DEFAULT_FIELDS
+          else: 
+            fields = DEFAULT_FIELDS_WITHOUT_SOCIAL_DATA
+
+      if scrape_reviews:
+        if Fields.DETAILED_REVIEWS not in fields:
+                fields.append(Fields.DETAILED_REVIEWS)
+      else: 
+        if Fields.DETAILED_REVIEWS in fields:
+            fields.remove(Fields.DETAILED_REVIEWS)
+          
+    # Check if should_scrape_socials is True and there are no occurrences of any ALL_SOCIAL_FIELDS in fields
+      if should_scrape_socials:
+        if not any(field in fields for field in ALL_SOCIAL_FIELDS):
+            fields.extend(DEFAULT_SOCIAL_FIELDS)
+      else:
+        # Remove any occurrences of ALL_SOCIAL_FIELDS from fields
+        fields = [field for field in fields if field not in ALL_SOCIAL_FIELDS]
+    #   print(fields)
+      return fields
+
+
+
+class Gmaps:
+  SORT_DESCENDING = "desc"
+  SORT_ASCENDING = "asc"
+  SORT_BY_REVIEWS_DESCENDING = [Fields.REVIEWS, SORT_DESCENDING]
+  SORT_BY_RATING_DESCENDING = [Fields.RATING, SORT_DESCENDING]
+  SORT_BY_NAME_ASCENDING = [Fields.NAME, SORT_ASCENDING]
+
+  SORT_BY_NOT_HAS_WEBSITE = [Fields.WEBSITE, False]
+  SORT_BY_HAS_WEBSITE = [Fields.WEBSITE, True]
+
+  SORT_BY_IS_SPENDING_ON_ADS = [Fields.IS_SPENDING_ON_ADS, True]
+
+  SORT_BY_NOT_HAS_LINKEDIN = [Fields.LINKEDIN, True]
+
+  SORT_BY_NOT_HAS_PHONE = [Fields.PHONE, False]
+  SORT_BY_HAS_PHONE = [Fields.PHONE, True]
+
+  DEFAULT_SORT = [SORT_BY_REVIEWS_DESCENDING, SORT_BY_HAS_WEBSITE, SORT_BY_NOT_HAS_LINKEDIN, SORT_BY_IS_SPENDING_ON_ADS]
+  ALL_REVIEWS = None
+
+  MOST_RELEVANT = "most_relevant" 
+  NEWEST  = "newest"
+  HIGHEST_RATING = "highest_rating" 
+  LOWEST_RATING= "lowest_rating"
+
+  ALL_FIELDS = "all"
+
+  DEFAULT_FIELDS = "default"
+
+  Cities  = Cities()
+  Lang  = Lang()
+  Category  = Category()
+  Fields = Fields()
+  
+  @staticmethod
+  def places(queries: List[str],
+             min_reviews: Optional[int] = None,
+             max_reviews: Optional[int] = None,
+             is_spending_on_ads: Optional[bool] = False,
+             category_in: Optional[List[str]] = None,
+             
+             has_website: Optional[bool] = None,
+             
+             has_phone: Optional[bool] = None,
+             min_rating: Optional[float] = None,
+             max_rating: Optional[float] = None,
+             
+             sort: Optional[List[str]] = DEFAULT_SORT,
+             
+             max: Optional[int] = None,
+             
+             key: Optional[str] = None,
+             
+             convert_to_english: bool = True,
+             use_cache: bool = True,
+
+             scrape_reviews: bool = False,
+             reviews_max: int = 20,
+             reviews_sort: int = NEWEST,
+             fields: Optional[List[str]] = DEFAULT_FIELDS,
+             lang: Optional[str] = None,
+             geo_coordinates: Optional[str] = None,
+             zoom: Optional[float] = None) -> List[Dict]:
+      """
+      Function to scrape Google Maps places based on various criteria.
+
+      :param queries: List of search queries or a single search query.
+      :param min_reviews: Minimum number of reviews a place should have.
+      :param max_reviews: Maximum number of reviews a place should have.
+      :param category_in: List of categories the places should belong to.
+      :param has_website: Boolean indicating if the place should have a website.
+      :param has_phone: Boolean indicating if the place should have a phone number.
+      :param min_rating: Minimum rating of the places.
+      :param max_rating: Maximum rating of the places.
+      :param sort: Sort criteria for the results.
+      :param max: Maximum number of results to return.
+      :param key: API key for Emails, Social Links Scraping.
+      :param convert_to_english: Boolean indicating whether to convert non-English characters to English characters.
+      :param use_cache: Boolean indicating whether to use cached data.
+      :param scrape_reviews: Boolean indicating if the reviews should be scraped.
+      :param reviews_max: Maximum number of reviews to scrape per place.
+      :param reviews_sort: Sort order for reviews.
+      :param fields: List of fields to return in the result.
+      :param lang: Language in which to return the results.
+      :param geo_coordinates: Geographical coordinates to scrape around.
+      :param zoom: Zoom level for scraping.
+      :return: List of dictionaries with the scraped place data.
+      """
+
+      result = []
+
+      should_scrape_socials = key is not None      
+      fields = determine_fields(fields, should_scrape_socials, scrape_reviews) 
+          
+      for query in queries:
+        # 1. Scrape Places
+                                        
+        place_data = create_place_data(query, max, lang, geo_coordinates, zoom,links=[])
+        places_obj = scraper.scrape_places(place_data, cache = use_cache)
+
+        result_item = process_result(key, scrape_reviews, reviews_max, reviews_sort,  lang, should_scrape_socials,places_obj)
+
+        result.append(result_item)
+      
+      all_places = sort_places(merge_places(result), sort)
+      write_output("all", all_places, fields)
+
+      scraper.scrape_places.close()
+      return result
+
+
+
+  @staticmethod
+  def links(  
+              links: List[str],
+              output_folder: str,
+              min_reviews: Optional[int] = None,
+              max_reviews: Optional[int] = None,
+              category_in: Optional[List[str]] = None,
+              has_website: Optional[bool] = None,
+              has_phone: Optional[bool] = None,
+              min_rating: Optional[float] = None,
+              max_rating: Optional[float] = None,
+              sort: Optional[List[str]] = DEFAULT_SORT,
+              max: Optional[int] = None,
+              key: Optional[str] = None,
+              convert_to_english: bool = True,
+              use_cache: bool = True,
+              scrape_reviews: bool = False,
+              reviews_max: int = 20,
+              reviews_sort: int = NEWEST,
+              fields: Optional[List[str]] = DEFAULT_FIELDS,
+              lang: Optional[str] = None) -> List[Dict]:
+        """
+        Function to scrape data from specific Google Maps place links.
+
+        :param links: List of Google Maps place links to scrape data from.
+        :param min_reviews: Minimum number of reviews a place should have.
+        :param max_reviews: Maximum number of reviews a place should have.
+        :param category_in: List of categories the places should belong to.
+        :param has_website: Boolean indicating if the place should have a website.
+        :param has_phone: Boolean indicating if the place should have a phone number.
+        :param min_rating: Minimum rating of the places.
+        :param max_rating: Maximum rating of the places.
+        :param sort: Sort criteria for the results (not typically used with direct links).
+        :param max: Maximum number of results to return.
+        :param key: API key for Emails, Social Links Scraping.
+        :param convert_to_english: Boolean indicating whether to convert non-English characters to English characters.
+        :param use_cache: Boolean indicating whether to use cached data.
+        :param scrape_reviews: Boolean indicating if the reviews should be scraped.
+        :param reviews_max: Maximum number of reviews to scrape per place.
+        :param reviews_sort: Sort order for reviews.
+        :param fields: List of fields to return in the result.
+        :param lang: Language in which to return the results.
+        :return: List of dictionaries with the scraped data for each link.
+        """
+
+  
+        should_scrape_socials = key is not None      
+        fields = determine_fields(fields, should_scrape_socials, scrape_reviews) 
+
+        if max is not None:
+            links = links[:max]
+
+        places = scraper.scrape_places_by_links({"links": links, "convert_to_english": convert_to_english, "cache": use_cache}, cache=use_cache)
+        scraper.scrape_places_by_links.close()
+        places_obj  = {"query":output_folder, "places": places }
+        
+        result_item = process_result(key, scrape_reviews, reviews_max, reviews_sort,  lang, should_scrape_socials,places_obj)
+        
+        return result_item

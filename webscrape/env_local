@@ -1,0 +1,24 @@
+#DIGITAL OCEAN
+
+#SECRET_KEY
+SECRET_KEY='django-insecure-ytc2@y$_k-mgp8(%6yw2t#7v-**g^u*jp_!t+u9mrknb8um6ot'
+
+ALLOWED_HOSTS = "127.0.0.1,localhost,0.0.0.0,192.168.1.10,*,"
+CORS_ORIGIN_WHITELIST = "http://localhost:4200,http://192.168.1.122:5173,http://192.168.1.122,http://localhost:3000,http://localhost:5173,http://192.168.1.64:5173,http://localhost,"#frontend ip
+CSRF_TRUSTED_ORIGINS = "http://127.0.0.1,http://192.168.1.10,http://192.168.1.103,http://192.168.1.64,"#backend ip
+
+
+
+DATABASE_ENGINE=django.db.backends.postgresql
+DATABASE_NAME=webscrape
+DATABASE_USER=postgres
+DATABASE_PASSWORD=md
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+
+
+
+
+
+
+

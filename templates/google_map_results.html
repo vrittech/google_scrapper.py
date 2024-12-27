@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Google Map Scraper Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
+        .results {
+            max-width: 800px;
+            margin: auto;
+            background-color: #ffffff;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .result-item {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        h1 {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Google Map Scraper Results</h1>
+    <div class="results">
+        {% if results %}
+            {% for result in results %}
+                <div class="result-item">
+                    <strong>Name:</strong> {{ result.Name }}<br>
+                    <strong>Address:</strong> {{ result.Address }}<br>
+                    <strong>Phone:</strong> {{ result.Phone Number }}<br>
+                    <strong>Website:</strong> <a href="{{ result.Website }}" target="_blank">{{ result.Website }}</a><br>
+                    <strong>Category:</strong> {{ result.Business Category }}<br>
+                    <strong>Google Map Link:</strong> <a href="{{ result.Google Map Link }}" target="_blank">{{ result.Google Map Link }}</a><br>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No results found.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

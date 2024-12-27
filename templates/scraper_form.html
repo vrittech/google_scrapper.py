@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Maps Scraper</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f9f9f9;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .wrapper {
+            max-width: 600px;
+            margin: 50px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        textarea, input, button, select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        #resultsContainer {
+            background: #f4f4f4;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-top: 20px;
+            overflow-x: auto;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <h1>Google Maps Scraper</h1>
+        <form id="scrapeForm">
+            <textarea id="keywords" rows="3" placeholder="Keywords (e.g., Schools, Restaurants)" required></textarea>
+            <textarea id="locations" rows="3" placeholder="Locations (e.g., Kathmandu, Pokhara)" required></textarea>
+            <input type="number" id="max_results" value="10" min="1" placeholder="Max results per combination" required>
+            <label>
+                <input type="checkbox" id="scrape_reviews"> Scrape Reviews
+            </label>
+            <label>
+                <input type="checkbox" id="convert_to_english" checked> Convert to English
+            </label>
+            <select id="fields" multiple size="8">
+                <option value="name">Name</option>
+                <option value="rating">Rating</option>
+                <option value="address">Address</option>
+                <option value="phone">Phone</option>
+                <option value="website">Website</option>
+                <option value="coordinates">Coordinates</option>
+                <option value="reviews">Reviews</option>
+                <option value="price_range">Price Range</option>
+                <option value="website">Website</option>
+                <option value="urls">URL</option>
+            </select>
+            <input type="text" id="api_key" placeholder="API Key (optional)">
+            <input type="text" id="lang" placeholder="Language (e.g., en, es)">
+            <button type="submit">Submit</button>
+        </form>
+        <div id="resultsContainer">No data yet. Submit the form to fetch results.</div>
+    </div>
+    <script>
+        document.getElementById("scrapeForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const keywords = document.getElementById("keywords").value.split(",").map(k => k.trim());
+            const locations = document.getElementById("locations").value.split(",").map(l => l.trim());
+            const max_results = parseInt(document.getElementById("max_results").value);
+            const scrape_reviews = document.getElementById("scrape_reviews").checked;
+            const convert_to_english = document.getElementById("convert_to_english").checked;
+            const fields = Array.from(document.getElementById("fields").selectedOptions).map(opt => opt.value);
+            const api_key = document.getElementById("api_key").value || null;
+            const lang = document.getElementById("lang").value || null;
+
+            const resultsContainer = document.getElementById("resultsContainer");
+            resultsContainer.textContent = "Fetching data...";
+
+            try {
+                const response = await fetch("/api/scrape/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        keywords,
+                        locations,
+                        max_results,
+                        scrape_reviews,
+                        convert_to_english,
+                        fields,
+                        api_key,
+                        lang,
+                    }),
+                });
+
+                if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+                const data = await response.json();
+                resultsContainer.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultsContainer.textContent = `Error: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>

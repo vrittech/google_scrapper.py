@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Website Contact Scraper</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
+        form {
+            max-width: 500px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        input, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            font-weight: bold;
+            color: #555;
+        }
+        p {
+            font-size: 14px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <h1>Website Contact Scraper</h1>
+    <form method="get" action="/api/website-contact-scraping/">
+        <label for="websites">Enter Website URLs (comma-separated):</label>
+        <textarea 
+            id="websites" 
+            name="websites" 
+            rows="5" 
+            placeholder="e.g., https://example.com, https://anotherexample.com" 
+            required></textarea>
+        <p>Provide website URLs separated by commas (e.g., https://example1.com, https://example2.com).</p>
+        
+        <button type="submit">Scrape Contacts</button>
+    </form>
+</body>
+</html>

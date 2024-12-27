@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Google Map Scraper</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
+        form {
+            max-width: 500px;
+            margin: auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center;">Google Map Scraper</h1>
+    <form method="get" action="/api/google-map-scraping/">
+        <label for="search_query">Search Query (e.g., restaurants):</label>
+        <input type="text" id="search_query" name="search_query" placeholder="Enter keywords" required>
+        
+        <label for="country">Country (Optional):</label>
+        <input type="text" id="country" name="country" placeholder="Enter country">
+
+        <label for="district">District/City (Optional):</label>
+        <input type="text" id="district" name="district" placeholder="Enter district or city">
+
+        <label for="google_map_link">Google Map Link (Optional):</label>
+        <input type="url" id="google_map_link" name="google_map_link" placeholder="Paste Google Map link">
+
+        <label for="results">Number of Results You Want to Extract:</label>
+        <input type="number" id="results" name="results" min="1" value="10" required>
+
+        <button type="submit">Scrape</button>
+    </form>
+</body>
+</html>
